@@ -1,6 +1,0 @@
-[submodule "utils/Arduino-Makefile"]
-	path = utils/Arduino-Makefile
-	url = https://github.com/sudar/Arduino-Makefile.git
-[submodule "utils/Esp8266-Arduino-Makefile"]
-	path = utils/Esp8266-Arduino-Makefile
-	url = https://github.com/thunderace/Esp8266-Arduino-Makefile.git
