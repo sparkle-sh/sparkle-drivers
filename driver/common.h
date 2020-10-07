@@ -3,18 +3,23 @@
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 
-void setupEnv() {
+struct Subnet {
+  uint8_t a;
+  uint8_t b;
+  uint8_t c;
+};
+
+void setupEnv(String ssid, String passwd) {
   Serial.begin(115200);
   Serial.println();
 
-  WiFi.begin("", "");
+  WiFi.begin(ssid, passwd);
 
   while (WiFi.status() != WL_CONNECTED) {
 //      Serial.println(F("Connecting"));
       delay(500);   
   }
   Serial.println(F("Connected"));
-//  Serial.print(F("Driver IP address: "));
   Serial.println(WiFi.localIP());
 }
 
@@ -93,14 +98,19 @@ private:
 
 class ConnectorClient {
 public:
-  ConnectorClient(IPAddress ip, int port) 
-    : m_ip(ip),
-      m_port(port)
-  {
-  }
+  bool connect(int port, Subnet net) {
+    m_port = port;
 
-  bool connect() {
-    return m_client.connect(m_ip, m_port); 
+    for (uint8_t d = 7; d < 100; ++d) {
+      IPAddress ip(net.a, net.b, net.c, d);
+      Serial.print("Trying address: ");
+      Serial.println(ip);      
+      if (m_client.connect(ip, port)) {
+        Serial.println("connected");
+        return true;
+      }
+    }
+    return false;
   }
 
   void setupDevices(const std::vector<std::shared_ptr<Device>>& devices) {
@@ -186,7 +196,6 @@ public:
 
 private:
   WiFiClient m_client;
-  IPAddress m_ip;
   int m_port;
 
 };

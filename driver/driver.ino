@@ -5,24 +5,28 @@ std::vector<std::shared_ptr<Device>> DEVICES;
 
 DynamicJsonDocument handleRequest(String h, JsonObject content);
 
+bool S_OK = true;
+
 void setup() {
-  IPAddress CONNECTOR_IP(192, 168, 1, 13);  
+  setupEnv("", "");
+
+//  IPAddress CONNECTOR_IP(192, 168, 1, 13);  
   const int CONNECTOR_PORT = 7777;
 
-  CC = std::unique_ptr<ConnectorClient>(new ConnectorClient(CONNECTOR_IP, CONNECTOR_PORT));
+  Subnet net = {192, 168, 1};  
   
+  CC = std::unique_ptr<ConnectorClient>(new ConnectorClient());
+  S_OK = CC->connect(CONNECTOR_PORT, net);
+  CC->initializeSession();
+
   std::vector<int> states = {0, 1};
   DEVICES.emplace_back(std::make_shared<SwitchableDevice>("Arya", "simple lights", 14, states));
-
-  setupEnv();
-  CC->connect();
-  CC->initializeSession();
   CC->setupDevices(DEVICES);
 }
 
 // the loop function runs over and over again forever
 void loop() {
-    while (true) {
+    while (S_OK) {
       DynamicJsonDocument req(256);
       CC->readPayload(req);
       auto res = handleRequest(req);
